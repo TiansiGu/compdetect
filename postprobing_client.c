@@ -61,4 +61,5 @@ void post_probe(struct configurations *configs) {
 			break;
 		}
 	}
+	close(sock);
 }

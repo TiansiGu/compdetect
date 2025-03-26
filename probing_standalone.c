@@ -137,7 +137,6 @@ int send_SYN(int sock_syn, struct configurations *configs, uint16_t server_port)
 	struct ip iphr;
 	int res = populate_ip_header(&iphr, configs, IPPROTO_TCP, sizeof(struct tcphdr)); //no payload, data_size is only tcp header size
 	if (res == -1) {
-		printf("Create ip header failed for tcp SYN \n");
 		return -1;
 	}
 
@@ -304,7 +303,6 @@ void send_detect_packets(void *arg) {
 	// Send head SYN
 	int result = send_SYN(sock_syn, configs, configs->server_port_head_SYN);
 	if (result == -1) {
-		printf("Failed to send head SYN packet \n");
 		close(sock_syn);
 		close(sock_udp);
 	}
@@ -349,7 +347,6 @@ void send_detect_packets(void *arg) {
 
 	close(sock_syn);
 	close(sock_udp);
-	printf("Sender thread done \n");
 }
 
 /** 
@@ -367,7 +364,7 @@ void *start_send(void *arg) {
 	}
 	pthread_mutex_unlock(&lock);
 	
-	printf("receiver ready, start sending detect packets now... \n");
+	// Wake up and start sending
 	send_detect_packets(arg);
 	return NULL;
 }
@@ -408,17 +405,14 @@ void set_nonblocking(int fd) {
 int parse_recv_packet(unsigned char *buf, struct configurations *configs) {
 	struct ip *iph = (struct ip *) buf;
 	if (iph->ip_v != 4) {
-		printf("ip version unmatch: %d\n", iph->ip_v);
 		return -1; //only keep ipv4 
 	}
 	if (iph->ip_src.s_addr != inet_addr(configs->server_ip_addr)) {
-		printf("ip addr unmatch\n");
 		return -1;
 	} //not from the detecting server we sent SYN to
 
 	struct tcphdr *tcph = (struct tcphdr *) (buf + iph->ip_hl * 4); 
 	if (tcph->th_flags & TH_RST == 0) {
-		printf("RST bit not set \n");
 		return -1;
 	} //RST bit not set packet
 	
@@ -428,7 +422,6 @@ int parse_recv_packet(unsigned char *buf, struct configurations *configs) {
 	} else if (src_port == configs->server_port_tail_SYN) {
 		return 1;
 	} else {
-		printf("th sport unmatch: %u \n", src_port);
 		return -1;
 	}
 }
@@ -517,7 +510,6 @@ void *start_recv(void *arg) {
 
 		// parse received buffer and filtered out packets 
 		int result = parse_recv_packet(buf, configs);
-		printf("get a packet, result %d\n", result);
 		if (result == 0) {
 			if (head_c == 0) clock_gettime(CLOCK_MONOTONIC, &t_l1);
 			else clock_gettime(CLOCK_MONOTONIC, &t_ln);
@@ -531,7 +523,6 @@ void *start_recv(void *arg) {
 		}
 
 		if (head_c == 2 && tail_c == 2) {
-			printf("Received RST packets done \n");
 			break;
 		}
 	}
@@ -539,7 +530,6 @@ void *start_recv(void *arg) {
 	if (head_c == 2 && tail_c == 2) {
 		long t_l = (t_ln.tv_sec - t_l1.tv_sec) * 1000L + (t_ln.tv_nsec - t_l1.tv_nsec) / 1000000L;
 		long t_h = (t_hn.tv_sec - t_h1.tv_sec) * 1000L + (t_hn.tv_nsec - t_h1.tv_nsec) / 1000000L;
-		printf("Time difference %ld\n", t_h - t_l);
 		if (t_h - t_l > configs->tau) {
 			printf("Compression detected!\n");
 		} else {
@@ -548,7 +538,7 @@ void *start_recv(void *arg) {
 	}
 
 	close(sock);
-	printf("Receiver thread done \n");
+
 	return NULL;
 }
 
@@ -577,6 +567,4 @@ void probe(struct configurations *configs) {
 	// Wait for both of the threads to finish
 	pthread_join(sender_thr, NULL);
 	pthread_join(listener_thr, NULL);
-
-	printf("Detection completed! \n");
 }

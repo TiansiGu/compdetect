@@ -61,7 +61,7 @@ The configuration file for the programs is a json file. It has the following fie
 - `server_port_tail_SYN`(Integer): Destination Port Number for TCP Tail SYN
 - `udp_src_port`(Integer): Source Port Number for UDP  (default value: 9876)
 - `udp_dst_port`(Integer): Destination Port Number for UDP  (default value: 8765)
-- `udp_head_bytes`(String): The first 10 Bytes for High Entropy UDP Payload, Should of Length 10 (default value: "1234567890")
+- `udp_head_bytes`(String): The first 10 Bytes for High Entropy UDP Payload, Should of Length 10 (default value: "1234567890"). This param serves as an identifier between low and high entropy packet as a collective timeout is set for the server to receive two UDP trains. [Related Piazza Discussion](https://piazza.com/class/m62nmzbotec1lq/post/43)
 - `l`(Integer): The Size of the UDP Payload in the UDP Packet Train (default value: 1000)
 - `n`(Integer): The Number of UDP Packets in one UDP Packet Train (default value: 6000)
 - `gamma`(Integer): Inter-Measurement Time (default value: 15)

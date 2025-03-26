@@ -70,10 +70,8 @@ int check_entropy(unsigned char *buf, unsigned char *low_entropy_data_head,
 	unsigned char *high_entropy_data_head, int head_len) {
 
 	if (memcmp(buf, low_entropy_data_head, head_len) == 0) {
-		//printf("low entropy packet \n");
 		return 0;
 	} else if (memcmp(buf, high_entropy_data_head, head_len) == 0) {
-		//printf("high entropy packet \n");
 		return 1;
 	} else {
 		return -1;
@@ -112,7 +110,6 @@ long receive_packet_trains(int sock, struct sockaddr *cin, socklen_t cin_len, st
 			if (errno == EAGAIN || errno == EWOULDBLOCK) {
 				clock_gettime(CLOCK_MONOTONIC, &t_curr);
 				if (t_curr.tv_sec - t_init.tv_sec > CUTOFF_TIME) {
-					printf("Time out, terminating here\n");
 					break;
 				} else {
 					continue; // No data available (non-blocking)
@@ -139,7 +136,6 @@ long receive_packet_trains(int sock, struct sockaddr *cin, socklen_t cin_len, st
 			break;
 		}
 	}
-	printf("In total extracted %d packets\n", low_count + high_count);
     
 	// arrival time between first and last packet for low entropy packet train
 	long t_l = (t_ln.tv_sec - t_l1.tv_sec) * 1000L + (t_ln.tv_nsec - t_l1.tv_nsec) / 1000000L;
@@ -189,7 +185,6 @@ void serve_probe(struct configurations *configs, int *detect_result) {
 	socklen_t cin_len = sizeof(cin);
 	long time_difference = receive_packet_trains(sock, (struct sockaddr *)&cin, cin_len, configs);
 
-	printf("Time difference %ld\n", time_difference);
 	if (time_difference > configs->tau) {
 		*detect_result = 1;
 	} else {
