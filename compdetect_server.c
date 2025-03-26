@@ -107,11 +107,6 @@ int main(int argc, char* argv[]) {
 	
 	int detect_result = 0;
 	serve_probe(&configs, &detect_result);
-	if (detect_result == 0) {
-		printf("No compression detected\n");
-	} else {
-		printf("Compression detected!");
-	}
 
 	serve_post_probe(configs.server_port_postprobing, detect_result);
 

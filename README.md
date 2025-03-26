@@ -50,6 +50,11 @@ To build and run the applications, the following environament and modules are re
 % make -f Makefile_standalone
 ```
 
+You can clean up executables using:
+```
+% make -f [make name]
+```
+
 ## Configuration
 The configuration file for the programs is a json file. It has the following fields:
 - `server_ip_addr`(String): The Server’s IP Address (You must set)
@@ -100,7 +105,7 @@ Or
 ```
 % ./compdetect_server
 ```
-Note, if you changed `server_port_preprobing` to your custom value, be sure to run the server application with the same port as program parameter
+Note, if you changed `server_port_preprobing` to your custom value, be sure to run the server application with the same port as command-line parameter
 ```
 % ./compdetect_server [server_port_preprobing]
 ```
