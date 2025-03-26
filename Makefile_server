@@ -1,0 +1,12 @@
+OBJS = compdetect_server.o preprobing_server.o probing_server.o postprobing_server.o
+PROGS = compdetect_server
+LDFLAGS = -lcjson
+
+%.o: %.c server.h default.h
+	gcc -c -o $@ $< 
+
+$(PROGS): $(OBJS)
+	gcc -o $@ $^ $(LDFLAGS)
+
+clean:
+	rm -rf $(OBJS) $(PROGS)
